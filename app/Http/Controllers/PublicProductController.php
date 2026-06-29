@@ -35,19 +35,17 @@ class PublicProductController extends Controller
     /**
      * Tampilkan detail produk tunggal.
      */
-    public function show($slug)
-    {
-        $product = Product::where('slug', $slug)->firstOrFail();
-        
-        // Produk terkait
-        $relatedProducts = Product::where('id', '!=', $product->id)
-            ->where(function($q) use ($product) {
-                $q->where('motif', $product->motif)
-                  ->orWhere('size', $product->size);
-            })
-            ->take(3)
-            ->get();
-
-        return view('public.products.show', compact('product', 'relatedProducts'));
-    }
+  public function show($slug)
+{
+    $product = Product::where('slug', $slug)->firstOrFail();
+    $relatedProducts = Product::where('id', '!=', $product->id)
+        ->where('motif', $product->motif)
+        ->limit(4)
+        ->get();
+    
+    // Tambahkan data untuk tombol Book ke Google Form
+    $bookingLink = $product->booking_link ?? 'https://forms.gle/your-google-form-link';
+    
+    return view('public.products.show', compact('product', 'relatedProducts', 'bookingLink'));
+}
 }

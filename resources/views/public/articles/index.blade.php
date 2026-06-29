@@ -6,87 +6,116 @@
 <div class="bg-ivory/20 min-h-screen py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <!-- Page Header -->
-        <div class="text-center space-y-2">
-            <span class="text-xs font-bold text-batik-gold uppercase tracking-widest">Ruang Edukasi</span>
-            <h1 class="font-playfair text-4xl font-extrabold text-sogan">Artikel Budaya & Kesehatan</h1>
-            <div class="w-16 h-[2px] bg-batik-gold mx-auto mt-2"></div>
-            <p class="text-xs text-gray-500 max-w-md mx-auto">Pelajari lebih dalam mengenai sejarah Kampung Dinoyo, keunikan motif batik Malang, serta alasan pentingnya higienitas alat makan Anda.</p>
+        <div class="text-center space-y-3">
+            <span class="inline-block text-[10px] font-bold text-batik-gold uppercase tracking-[0.25em] border border-batik-gold/20 px-4 py-1">
+                Ruang Edukasi
+            </span>
+            <h1 class="font-playfair text-4xl sm:text-5xl font-bold text-sogan">Artikel Budaya & Kesehatan</h1>
+            <div class="w-16 h-[2px] bg-batik-gold mx-auto"></div>
+            <p class="text-sm text-gray-500 max-w-lg mx-auto leading-relaxed">
+                Pelajari lebih dalam mengenai sejarah Kampung Dinoyo, keunikan motif batik Malang, 
+                serta alasan pentingnya higienitas alat makan Anda.
+            </p>
         </div>
 
-        <!-- Tab Filters (Vanilla HTML Links) -->
-        <div class="flex flex-wrap justify-center gap-2 border-b border-batik-gold/15 pb-6">
+        <!-- Tab Filters - DARI DATABASE CATEGORIES -->
+        <div class="flex flex-wrap justify-center gap-3 pb-6 border-b border-batik-gold/10">
             <a href="{{ route('articles.index') }}" 
-                class="px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition-colors {{ !request()->filled('category') ? 'bg-sogan text-white' : 'bg-white text-sogan border border-batik-gold/20 hover:bg-ivory' }}">
+                class="px-5 py-2.5 text-xs font-semibold tracking-wider transition-all duration-300 {{ !request()->filled('category') ? 'bg-sogan text-white shadow-md' : 'bg-white text-sogan border border-batik-gold/20 hover:bg-ivory hover:border-batik-gold/40' }}">
                 Semua Kategori
             </a>
-            <a href="{{ route('articles.index', ['category' => 'keramik_dinoyo']) }}" 
-                class="px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition-colors {{ request('category') === 'keramik_dinoyo' ? 'bg-sogan text-white' : 'bg-white text-sogan border border-batik-gold/20 hover:bg-ivory' }}">
-                Kampung Keramik Dinoyo
-            </a>
-            <a href="{{ route('articles.index', ['category' => 'batik_malang']) }}" 
-                class="px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition-colors {{ request('category') === 'batik_malang' ? 'bg-sogan text-white' : 'bg-white text-sogan border border-batik-gold/20 hover:bg-ivory' }}">
-                Batik Malang
-            </a>
-            <a href="{{ route('articles.index', ['category' => 'topeng_malangan']) }}" 
-                class="px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition-colors {{ request('category') === 'topeng_malangan' ? 'bg-sogan text-white' : 'bg-white text-sogan border border-batik-gold/20 hover:bg-ivory' }}">
-                Topeng Malangan
-            </a>
-            <a href="{{ route('articles.index', ['category' => 'higienitas']) }}" 
-                class="px-4 py-2 rounded-full text-xs font-semibold tracking-wider transition-colors {{ request('category') === 'higienitas' ? 'bg-sogan text-white' : 'bg-white text-sogan border border-batik-gold/20 hover:bg-ivory' }}">
-                Higienitas Alat Makan
-            </a>
+            @foreach($categories as $cat)
+                <a href="{{ route('articles.index', ['category' => $cat->slug]) }}" 
+                    class="px-5 py-2.5 text-xs font-semibold tracking-wider transition-all duration-300 {{ request('category') === $cat->slug ? 'bg-sogan text-white shadow-md' : 'bg-white text-sogan border border-batik-gold/20 hover:bg-ivory hover:border-batik-gold/40' }}">
+                    {{ $cat->name }}
+                </a>
+            @endforeach
         </div>
 
-        <!-- Articles Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Articles Grid - 3 KOLOM -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             @forelse($articles as $art)
-                <div class="bg-white rounded-xl border border-batik-gold/15 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
-                    <div>
-                        <!-- Cover Image -->
-                        <div class="aspect-video w-full overflow-hidden bg-gray-50 border-b border-gray-100 relative">
-                            @if($art->image_path)
-                                @if(Str::startsWith($art->image_path, 'http') || Str::startsWith($art->image_path, 'storage/'))
-                                    <img src="{{ asset($art->image_path) }}" alt="{{ $art->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                                @else
-                                    <img src="{{ asset('storage/' . $art->image_path) }}" alt="{{ $art->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                                @endif
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-4xl text-gray-300">📖</div>
-                            @endif
-                            <span class="absolute bottom-3 left-3 bg-dark-brown/90 text-batik-gold text-[9px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">
-                                {{ str_replace('_', ' ', $art->category) }}
-                            </span>
-                        </div>
-
-                        <!-- Details -->
-                        <div class="p-6 space-y-3">
-                            <span class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">{{ $art->created_at->format('d M Y') }}</span>
-                            <h3 class="font-playfair text-lg font-bold text-sogan leading-tight group-hover:text-batik-gold transition-colors">
-                                <a href="{{ route('articles.show', $art->slug) }}">{{ $art->title }}</a>
-                            </h3>
-                            <p class="text-xs text-gray-500 leading-relaxed line-clamp-3">
-                                {{ $art->content }}
-                            </p>
-                        </div>
+                <div class="group bg-white border border-batik-gold/10 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-2">
+                    
+                    <!-- Cover Image -->
+                    <div class="relative w-full overflow-hidden bg-gray-100" style="aspect-ratio: 16/10;">
+                        @php
+                            $imgPath = $art->image_path ?? '';
+                            $imgUrl = '';
+                            $fileExists = false;
+                            
+                            if (!empty($imgPath)) {
+                                if (str_starts_with($imgPath, 'http')) {
+                                    $imgUrl = $imgPath;
+                                    $fileExists = true;
+                                } elseif (str_starts_with($imgPath, 'storage/')) {
+                                    $imgUrl = asset($imgPath);
+                                    if (file_exists(public_path($imgPath))) {
+                                        $fileExists = true;
+                                    }
+                                } elseif (str_starts_with($imgPath, 'articles/')) {
+                                    $imgUrl = asset('storage/' . $imgPath);
+                                    if (file_exists(public_path('storage/' . $imgPath))) {
+                                        $fileExists = true;
+                                    }
+                                } else {
+                                    $imgUrl = asset('storage/' . $imgPath);
+                                    if (file_exists(public_path('storage/' . $imgPath))) {
+                                        $fileExists = true;
+                                    }
+                                }
+                                if (!$fileExists && file_exists(public_path($imgPath))) {
+                                    $fileExists = true;
+                                    $imgUrl = asset($imgPath);
+                                }
+                            }
+                        @endphp
+                        
+                        @if($fileExists && !empty($imgUrl))
+                            <img src="{{ $imgUrl }}" alt="{{ $art->title }}" 
+                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-5xl text-gray-300 font-playfair">✦</div>
+                        @endif
+                        
+                        <!-- Category Badge -->
+                        <span class="absolute bottom-4 left-4 bg-sogan/90 backdrop-blur-sm text-white text-[9px] font-bold px-3 py-1 uppercase tracking-wider border border-white/10">
+                            {{ $art->category->name ?? 'Uncategorized' }}
+                        </span>
                     </div>
 
-                    <div class="px-6 pb-6 pt-3 border-t border-gray-50">
-                        <a href="{{ route('articles.show', $art->slug) }}" 
-                            class="text-xs font-bold text-moss-green hover:underline flex items-center gap-1">
-                            Baca Artikel Lengkap →
-                        </a>
+                    <!-- Content - TANPA TANGGAL -->
+                    <div class="p-6 space-y-4">
+                        <h3 class="font-playfair text-xl font-bold text-sogan leading-tight group-hover:text-batik-gold transition-colors duration-300 line-clamp-2">
+                            <a href="{{ route('articles.show', $art->slug) }}">{{ $art->title }}</a>
+                        </h3>
+                        <p class="text-sm text-gray-500 leading-relaxed line-clamp-3">
+                            {{ Str::limit($art->content, 130) }}
+                        </p>
+                        
+                        <!-- Read More -->
+                        <div class="pt-3 border-t border-gray-100">
+                            <a href="{{ route('articles.show', $art->slug) }}" 
+                                class="inline-flex items-center gap-2 text-xs font-bold text-batik-gold hover:text-sogan transition-colors duration-300 group-hover:gap-3">
+                                Baca Selengkapnya
+                                <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                </svg>
+                            </a>
+                        </div>
                     </div>
                 </div>
             @empty
-                <div class="col-span-full py-16 text-center text-sm text-gray-400">
+                <div class="col-span-full py-20 text-center text-sm text-gray-400">
+                    <span class="text-6xl block mb-4">📖</span>
                     Tidak ditemukan artikel untuk kategori ini.
                 </div>
             @endforelse
         </div>
 
         <!-- Pagination -->
-        @if($articles->hasPages())
-            <div class="mt-12">
+        @if(method_exists($articles, 'hasPages') && $articles->hasPages())
+            <div class="mt-12 pt-4 border-t border-batik-gold/10">
                 {{ $articles->appends(request()->input())->links() }}
             </div>
         @endif

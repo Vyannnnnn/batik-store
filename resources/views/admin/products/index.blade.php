@@ -8,15 +8,44 @@
     <div class="flex justify-between items-center">
         <div>
             <h1 class="font-playfair text-3xl font-bold text-sogan">Kelola Produk</h1>
-            <p class="text-sm text-gray-500">Tambah, ubah, atau hapus produk piring keramik batik Anda.</p>
+            <p class="text-sm text-gray-500">Tambah, ubah, atau hapus produk mangkuk keramik batik.</p>
         </div>
-        <a href="{{ route('admin.products.create') }}" class="bg-sogan hover:bg-dark-brown text-white px-4 py-2.5 rounded-lg font-semibold transition-colors flex items-center gap-2">
-            <span>+</span> Tambah Produk Baru
+        <a href="{{ route('admin.products.create') }}" 
+           class="bg-sogan hover:bg-dark-brown text-white px-4 py-2.5 font-semibold transition-colors flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Tambah Produk
         </a>
     </div>
 
-    <!-- Product Table Card -->
-    <div class="bg-white rounded-xl border border-batik-gold/20 shadow-sm overflow-hidden">
+    <!-- Alert Messages -->
+    @if(session('success'))
+        <div class="bg-green-50 border-l-4 border-green-500 p-4 text-sm text-green-700 shadow-sm flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 text-sm text-red-700 shadow-sm flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 text-sm text-red-700 shadow-sm">
+            <ul class="list-disc pl-5">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <!-- Product Table -->
+    <div class="bg-white border border-batik-gold/20 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -31,37 +60,75 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
                     @forelse($products as $prod)
-                        <tr>
+                        <tr class="hover:bg-ivory/30 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="w-12 h-12 rounded border border-gray-200 overflow-hidden bg-gray-50">
-                                    @if(Str::startsWith($prod->image_path, 'http') || Str::startsWith($prod->image_path, 'storage/'))
-                                        <img src="{{ asset($prod->image_path) }}" alt="{{ $prod->name }}" class="w-full h-full object-cover">
+                                <div class="w-12 h-12 border border-gray-200 overflow-hidden bg-gray-50">
+                                    @php
+                                        $imgPath = $prod->image_path ?? '';
+                                        $imgUrl = '';
+                                        $fileExists = false;
+                                        
+                                        if (!empty($imgPath)) {
+                                            if (str_starts_with($imgPath, 'http')) {
+                                                $imgUrl = $imgPath;
+                                                $fileExists = true;
+                                            } elseif (str_starts_with($imgPath, 'storage/')) {
+                                                $imgUrl = asset($imgPath);
+                                                if (file_exists(public_path($imgPath))) {
+                                                    $fileExists = true;
+                                                }
+                                            } elseif (str_starts_with($imgPath, 'products/')) {
+                                                $imgUrl = asset('storage/' . $imgPath);
+                                                if (file_exists(public_path('storage/' . $imgPath))) {
+                                                    $fileExists = true;
+                                                }
+                                            } else {
+                                                $imgUrl = asset('storage/' . $imgPath);
+                                                if (file_exists(public_path('storage/' . $imgPath))) {
+                                                    $fileExists = true;
+                                                }
+                                            }
+                                            if (!$fileExists && file_exists(public_path($imgPath))) {
+                                                $fileExists = true;
+                                                $imgUrl = asset($imgPath);
+                                            }
+                                        }
+                                    @endphp
+                                    @if($fileExists && !empty($imgUrl))
+                                        <img src="{{ $imgUrl }}" alt="{{ $prod->name }}" class="w-full h-full object-cover">
                                     @else
-                                        <img src="{{ asset('storage/' . $prod->image_path) }}" alt="{{ $prod->name }}" class="w-full h-full object-cover">
+                                        <div class="w-full h-full flex items-center justify-center text-gray-300 text-xs">No Image</div>
                                     @endif
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-dark-brown">{{ $prod->name }}</div>
-                                <div class="text-xs text-gray-400 max-w-xs truncate">{{ $prod->slug }}</div>
+                                <div class="text-xs text-gray-400 truncate max-w-xs">{{ $prod->slug }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $prod->motif }}
+                                {{ $prod->motif ?? '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $prod->size }}
+                                {{ $prod->size ?? '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-sogan">
                                 Rp {{ number_format($prod->price, 0, ',', '.') }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex justify-end gap-3">
-                                    <a href="{{ route('admin.products.edit', $prod->id) }}" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded transition-colors">Edit</a>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                                <div class="flex justify-end gap-2">
+                                    <!-- Edit -->
+                                    <a href="{{ route('admin.products.edit', $prod->id) }}" 
+                                       class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1 rounded transition-colors text-xs">
+                                        Edit
+                                    </a>
                                     
-                                    <form action="{{ route('admin.products.destroy', $prod->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?')">
+                                    <!-- Delete -->
+                                    <form action="{{ route('admin.products.destroy', $prod->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded transition-colors">Hapus</button>
+                                        <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1 rounded transition-colors text-xs">
+                                            Hapus
+                                        </button>
                                     </form>
                                 </div>
                             </td>
@@ -69,7 +136,8 @@
                     @empty
                         <tr>
                             <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-400">
-                                Belum ada data produk. Klik "+ Tambah Produk Baru" untuk menambahkan.
+                                Belum ada produk. 
+                                <a href="{{ route('admin.products.create') }}" class="text-batik-gold hover:underline">Tambah produk pertama</a>
                             </td>
                         </tr>
                     @endforelse
@@ -77,8 +145,8 @@
             </table>
         </div>
         
-        <!-- Pagination Links -->
-        @if($products->hasPages())
+        <!-- Pagination -->
+        @if(method_exists($products, 'hasPages') && $products->hasPages())
             <div class="px-6 py-4 border-t border-gray-100">
                 {{ $products->links() }}
             </div>

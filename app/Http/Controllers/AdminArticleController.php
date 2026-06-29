@@ -3,112 +3,117 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AdminArticleController extends Controller
 {
-    /**
-     * Tampilkan daftar artikel.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $articles = Article::latest()->paginate(10);
-        return view('admin.articles.index', compact('articles'));
+        $query = Article::with('category');
+        
+        if ($request->has('category') && $request->category) {
+            $query->where('category_id', $request->category);
+        }
+        
+        $articles = $query->latest()->paginate(10);
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
+        
+        return view('admin.articles.index', compact('articles', 'categories'));
     }
 
-    /**
-     * Tampilkan form tambah artikel.
-     */
     public function create()
     {
-        return view('admin.articles.create');
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
+        return view('admin.articles.create', compact('categories'));
     }
 
-    /**
-     * Simpan artikel baru.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'category' => 'required|string|in:keramik_dinoyo,batik_malang,topeng_malangan,higienitas',
+            'category_id' => 'nullable|exists:categories,id', // ← PAKAI category_id
             'content' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'is_published' => 'nullable|boolean',
         ]);
 
-        $imagePath = null;
+        $data = $request->all();
+        $data['slug'] = Str::slug($request->title) . '-' . time();
+        $data['is_published'] = $request->has('is_published');
+
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('articles', 'public');
+            $file = $request->file('image');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('articles', $filename, 'public');
+            $data['image_path'] = $path;
         }
 
-        Article::create([
-            'title' => $request->title,
-            'slug' => Str::slug($request->title) . '-' . time(),
-            'category' => $request->category,
-            'content' => $request->content,
-            'image_path' => $imagePath,
-        ]);
+        Article::create($data);
 
-        return redirect()->route('admin.articles.index')->with('success', 'Artikel berhasil ditambahkan.');
+        return redirect()
+            ->route('admin.articles.index')
+            ->with('success', 'Artikel berhasil ditambahkan!');
     }
 
-    /**
-     * Tampilkan form edit artikel.
-     */
-    public function edit(Article $article)
+    public function edit($id)
     {
-        return view('admin.articles.edit', compact('article'));
+        $article = Article::with('category')->findOrFail($id);
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
+        return view('admin.articles.edit', compact('article', 'categories'));
     }
 
-    /**
-     * Update artikel.
-     */
-    public function update(Request $request, Article $article)
+    public function update(Request $request, $id)
     {
+        $article = Article::findOrFail($id);
+
         $request->validate([
             'title' => 'required|string|max:255',
-            'category' => 'required|string|in:keramik_dinoyo,batik_malang,topeng_malangan,higienitas',
+            'category_id' => 'nullable|exists:categories,id', // ← PAKAI category_id
             'content' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'is_published' => 'nullable|boolean',
         ]);
 
-        $imagePath = $article->image_path;
-        if ($request->hasFile('image')) {
-            if ($imagePath && Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
-            }
-            $imagePath = $request->file('image')->store('articles', 'public');
-        }
+        $data = $request->all();
+        $data['is_published'] = $request->has('is_published');
 
-        $slug = $article->slug;
         if ($article->title !== $request->title) {
-            $slug = Str::slug($request->title) . '-' . time();
+            $data['slug'] = Str::slug($request->title) . '-' . time();
         }
 
-        $article->update([
-            'title' => $request->title,
-            'slug' => $slug,
-            'category' => $request->category,
-            'content' => $request->content,
-            'image_path' => $imagePath,
-        ]);
+        if ($request->hasFile('image')) {
+            if ($article->image_path && Storage::disk('public')->exists($article->image_path)) {
+                Storage::disk('public')->delete($article->image_path);
+            }
 
-        return redirect()->route('admin.articles.index')->with('success', 'Artikel berhasil diperbarui.');
+            $file = $request->file('image');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('articles', $filename, 'public');
+            $data['image_path'] = $path;
+        }
+
+        $article->update($data);
+
+        return redirect()
+            ->route('admin.articles.index')
+            ->with('success', 'Artikel berhasil diperbarui!');
     }
 
-    /**
-     * Hapus artikel.
-     */
-    public function destroy(Article $article)
+    public function destroy($id)
     {
+        $article = Article::findOrFail($id);
+
         if ($article->image_path && Storage::disk('public')->exists($article->image_path)) {
             Storage::disk('public')->delete($article->image_path);
         }
 
         $article->delete();
 
-        return redirect()->route('admin.articles.index')->with('success', 'Artikel berhasil dihapus.');
+        return redirect()
+            ->route('admin.articles.index')
+            ->with('success', 'Artikel berhasil dihapus!');
     }
 }

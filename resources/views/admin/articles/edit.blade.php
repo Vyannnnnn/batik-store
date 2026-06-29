@@ -3,21 +3,19 @@
 @section('title', 'Edit Artikel')
 
 @section('content')
-<div class="space-y-6 max-w-4xl mx-auto">
+<div class="max-w-4xl mx-auto space-y-6">
     <!-- Header -->
     <div class="flex items-center gap-3">
-        <a href="{{ route('admin.articles.index') }}" class="text-gray-400 hover:text-sogan transition-colors font-medium">← Kembali</a>
+        <a href="{{ route('admin.articles.index') }}" class="text-gray-400 hover:text-sogan transition-colors">← Kembali</a>
         <div>
-            <h1 class="font-playfair text-3xl font-bold text-sogan">Edit Artikel</h1>
-            <p class="text-sm text-gray-500">Ubah formulir berikut untuk memperbarui artikel edukasi.</p>
+            <h1 class="font-playfair text-2xl font-bold text-sogan">Edit Artikel</h1>
+            <p class="text-sm text-gray-500">Ubah artikel edukasi.</p>
         </div>
     </div>
 
-    <!-- Error Alert -->
     @if($errors->any())
-        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded text-sm text-red-700 shadow-sm">
-            <span class="font-bold">Mohon perbaiki kesalahan berikut:</span>
-            <ul class="list-disc pl-5 mt-1">
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 text-sm text-red-700">
+            <ul class="list-disc list-inside">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -25,76 +23,66 @@
         </div>
     @endif
 
-    <!-- Form Card -->
-    <div class="bg-white p-8 rounded-xl border border-batik-gold/20 shadow-sm">
-        <form action="{{ route('admin.articles.update', $article->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-            @csrf
-            @method('PUT')
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Judul Artikel -->
-                <div class="md:col-span-2">
-                    <label for="title" class="block text-sm font-semibold text-dark-brown mb-2">Judul Artikel <span class="text-red-500">*</span></label>
-                    <input type="text" name="title" id="title" required value="{{ old('title', $article->title) }}"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-batik-gold focus:border-batik-gold text-sm"
-                        placeholder="Masukkan judul artikel yang menarik">
-                </div>
+    <form action="{{ route('admin.articles.update', $article->id) }}" method="POST" enctype="multipart/form-data" class="bg-white border border-gray-200 p-6 space-y-6">
+        @csrf
+        @method('PUT')
 
-                <!-- Kategori -->
-                <div>
-                    <label for="category" class="block text-sm font-semibold text-dark-brown mb-2">Kategori <span class="text-red-500">*</span></label>
-                    <select name="category" id="category" required
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-batik-gold focus:border-batik-gold text-sm bg-white">
-                        <option value="" disabled>-- Pilih Kategori --</option>
-                        <option value="keramik_dinoyo" {{ old('category', $article->category) === 'keramik_dinoyo' ? 'selected' : '' }}>Kampung Keramik Dinoyo</option>
-                        <option value="batik_malang" {{ old('category', $article->category) === 'batik_malang' ? 'selected' : '' }}>Batik Malang</option>
-                        <option value="topeng_malangan" {{ old('category', $article->category) === 'topeng_malangan' ? 'selected' : '' }}>Topeng Malangan</option>
-                        <option value="higienitas" {{ old('category', $article->category) === 'higienitas' ? 'selected' : '' }}>Higienitas Alat Makan</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Foto Sampul -->
+        <div class="grid grid-cols-1 gap-4">
+            <!-- Judul -->
             <div>
-                <label for="image" class="block text-sm font-semibold text-dark-brown mb-2">Ganti Foto Sampul (Opsional, Max 2MB)</label>
-                <input type="file" name="image" id="image" accept="image/*"
-                    class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-ivory file:text-sogan hover:file:bg-batik-gold/20 file:cursor-pointer border border-gray-300 rounded-lg py-1.5 px-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Judul Artikel <span class="text-red-500">*</span></label>
+                <input type="text" name="title" value="{{ old('title', $article->title) }}" 
+                       class="w-full border border-gray-300 p-2.5 text-sm focus:border-batik-gold focus:outline-none" required>
             </div>
 
-            <!-- Tampilan Gambar Sekarang -->
-            @if($article->image_path)
-                <div>
-                    <span class="block text-sm font-semibold text-dark-brown mb-2">Foto Sampul Sekarang:</span>
-                    <div class="w-64 h-36 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-                        @if(Str::startsWith($article->image_path, 'http') || Str::startsWith($article->image_path, 'storage/'))
-                            <img src="{{ asset($article->image_path) }}" alt="{{ $article->title }}" class="w-full h-full object-cover">
-                        @else
-                            <img src="{{ asset('storage/' . $article->image_path) }}" alt="{{ $article->title }}" class="w-full h-full object-cover">
-                        @endif
+            <!-- Kategori - DARI DATABASE categories -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Kategori <span class="text-red-500">*</span></label>
+                <select name="category_id" class="w-full border border-gray-300 p-2.5 text-sm focus:border-batik-gold focus:outline-none bg-white">
+                    <option value="">Pilih Kategori</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}" {{ old('category_id', $article->category_id) == $cat->id ? 'selected' : '' }}>
+                            {{ $cat->name }}
+                        </option>
+                    @endforeach
+                </select>
+                <p class="text-xs text-gray-400 mt-1">
+                    Kelola kategori di <a href="{{ route('admin.categories.index') }}" class="text-batik-gold hover:underline">Menu Kategori</a>.
+                </p>
+            </div>
+
+            <!-- Content -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Konten <span class="text-red-500">*</span></label>
+                <textarea name="content" rows="8" class="w-full border border-gray-300 p-2.5 text-sm focus:border-batik-gold focus:outline-none" required>{{ old('content', $article->content) }}</textarea>
+            </div>
+
+            <!-- Image -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Foto Sampul</label>
+                @if($article->image_path && file_exists(public_path('storage/' . $article->image_path)))
+                    <div class="mb-2">
+                        <img src="{{ asset('storage/' . $article->image_path) }}" alt="{{ $article->title }}" class="w-32 h-20 object-cover border border-gray-200">
+                        <p class="text-xs text-gray-400 mt-1">Current: {{ basename($article->image_path) }}</p>
                     </div>
-                </div>
-            @endif
+                @endif
+                <input type="file" name="image" accept="image/*" class="w-full border border-gray-300 p-2 text-sm focus:border-batik-gold focus:outline-none">
+                <p class="text-xs text-gray-400 mt-1">Max 2MB (JPG, PNG, WEBP) - Kosongkan jika tidak ingin mengganti</p>
+            </div>
 
-            <!-- Isi Artikel -->
+            <!-- Published -->
             <div>
-                <label for="content" class="block text-sm font-semibold text-dark-brown mb-2">Konten Artikel <span class="text-red-500">*</span></label>
-                <textarea name="content" id="content" rows="12" required
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-batik-gold focus:border-batik-gold text-sm font-sans"
-                    placeholder="Tuliskan artikel lengkap di sini...">{{ old('content', $article->content) }}</textarea>
+                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <input type="checkbox" name="is_published" value="1" {{ old('is_published', $article->is_published) ? 'checked' : '' }}>
+                    Publikasikan Artikel
+                </label>
             </div>
+        </div>
 
-            <!-- Submit Button -->
-            <div class="flex justify-end gap-3 border-t border-gray-100 pt-6">
-                <a href="{{ route('admin.articles.index') }}" 
-                    class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-colors">
-                    Batalkan
-                </a>
-                <button type="submit" 
-                    class="px-6 py-2.5 bg-sogan hover:bg-dark-brown text-white rounded-lg font-semibold text-sm transition-colors">
-                    Simpan Perubahan
-                </button>
-            </div>
-        </form>
-    </div>
+        <div class="flex justify-end gap-3 border-t border-gray-200 pt-6">
+            <a href="{{ route('admin.articles.index') }}" class="px-6 py-2.5 border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition">Batal</a>
+            <button type="submit" class="px-8 py-2.5 bg-sogan hover:bg-dark-brown text-white text-sm font-medium transition">Update Artikel</button>
+        </div>
+    </form>
 </div>
 @endsection

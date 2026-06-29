@@ -39,36 +39,75 @@
                     placeholder="Contoh: Detail piring tampak samping">
             </div>
 
-            <!-- Kategori -->
+            <!-- Kategori - DARI DATABASE categories -->
             <div>
-                <label for="category" class="block text-sm font-semibold text-dark-brown mb-2">Kategori Foto <span class="text-red-500">*</span></label>
-                <select name="category" id="category" required
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-batik-gold focus:border-batik-gold text-sm bg-white">
-                    <option value="" disabled>-- Pilih Kategori --</option>
-                    <option value="produk" {{ old('category', $gallery->category) === 'produk' ? 'selected' : '' }}>Foto Produk</option>
-                    <option value="kemasan" {{ old('category', $gallery->category) === 'kemasan' ? 'selected' : '' }}>Foto Kemasan</option>
-                    <option value="proses" {{ old('category', $gallery->category) === 'proses' ? 'selected' : '' }}>Foto Proses Pembuatan</option>
+                <label class="block text-sm font-semibold text-dark-brown mb-2">Kategori</label>
+                <select name="category_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-batik-gold focus:border-batik-gold text-sm bg-white">
+                    <option value="">Pilih Kategori</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}" {{ old('category_id', $gallery->category_id) == $cat->id ? 'selected' : '' }}>
+                            {{ $cat->name }}
+                        </option>
+                    @endforeach
                 </select>
+                <p class="text-xs text-gray-400 mt-1">
+                    Kelola kategori di <a href="{{ route('admin.categories.index') }}" class="text-batik-gold hover:underline">Menu Kategori</a>.
+                </p>
             </div>
 
             <!-- File Gambar (Optional) -->
-            <div>
-                <label for="image" class="block text-sm font-semibold text-dark-brown mb-2">Ganti Gambar (Opsional, Max 2MB)</label>
-                <input type="file" name="image" id="image" accept="image/*"
-                    class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-ivory file:text-sogan hover:file:bg-batik-gold/20 file:cursor-pointer border border-gray-300 rounded-lg py-1.5 px-3">
-            </div>
+<!-- File Gambar (Optional) -->
+<div>
+    <label for="image" class="block text-sm font-semibold text-dark-brown mb-2">Ganti Gambar (Opsional)</label>
+    <input type="file" name="image" id="image" accept="image/*"
+        class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-ivory file:text-sogan hover:file:bg-batik-gold/20 file:cursor-pointer border border-gray-300 rounded-lg py-1.5 px-3">
+    <p class="text-xs text-gray-400 mt-1">Kosongkan jika tidak ingin mengganti gambar. Max 2MB (JPG, PNG, WEBP)</p>
+</div>
 
-            <!-- Tampilan Gambar Sekarang -->
-            <div>
-                <span class="block text-sm font-semibold text-dark-brown mb-2">Gambar Sekarang:</span>
-                <div class="w-64 h-36 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-                    @if(Str::startsWith($gallery->image_path, 'http') || Str::startsWith($gallery->image_path, 'storage/'))
-                        <img src="{{ asset($gallery->image_path) }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover">
-                    @else
-                        <img src="{{ asset('storage/' . $gallery->image_path) }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover">
-                    @endif
-                </div>
+<!-- Tampilan Gambar Sekarang -->
+<div>
+    <span class="block text-sm font-semibold text-dark-brown mb-2">Gambar Sekarang:</span>
+    <div class="w-64 h-36 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+        @php
+            $imagePath = $gallery->image_path ?? '';
+            $imageUrl = '';
+            $fileExists = false;
+            
+            if (!empty($imagePath)) {
+                // Coba berbagai kemungkinan path
+                if (str_starts_with($imagePath, 'storage/')) {
+                    $imageUrl = asset($imagePath);
+                    if (file_exists(public_path($imagePath))) {
+                        $fileExists = true;
+                    }
+                } elseif (str_starts_with($imagePath, 'galleries/')) {
+                    $imageUrl = asset('storage/' . $imagePath);
+                    if (file_exists(public_path('storage/' . $imagePath))) {
+                        $fileExists = true;
+                    }
+                } else {
+                    $imageUrl = asset('storage/' . $imagePath);
+                    if (file_exists(public_path('storage/' . $imagePath))) {
+                        $fileExists = true;
+                    }
+                }
+                
+                // Jika masih tidak ada, coba langsung
+                if (!$fileExists && file_exists(public_path($imagePath))) {
+                    $fileExists = true;
+                    $imageUrl = asset($imagePath);
+                }
+            }
+        @endphp
+        @if($fileExists && !empty($imageUrl))
+            <img src="{{ $imageUrl }}" alt="{{ $gallery->title }}" class="w-full h-full object-cover">
+        @else
+            <div class="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                <span>Gambar tidak ditemukan</span>
             </div>
+        @endif
+    </div>
+</div>
 
             <!-- Deskripsi Singkat -->
             <div>
@@ -76,6 +115,15 @@
                 <textarea name="description" id="description" rows="3"
                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-batik-gold focus:border-batik-gold text-sm"
                     placeholder="Tuliskan keterangan singkat mengenai foto ini...">{{ old('description', $gallery->description) }}</textarea>
+            </div>
+
+            <!-- Status Aktif -->
+            <div>
+                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <input type="checkbox" name="is_active" value="1" 
+                           {{ old('is_active', $gallery->is_active) ? 'checked' : '' }}>
+                    Aktifkan Foto
+                </label>
             </div>
 
             <!-- Submit Button -->

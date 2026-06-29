@@ -3,39 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class PublicArticleController extends Controller
 {
-    /**
-     * Tampilkan halaman edukasi (artikel).
-     */
     public function index(Request $request)
     {
-        $query = Article::query();
-
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
-        }
-
-        $articles = $query->latest()->paginate(6);
+        $query = Article::with('category')->where('is_published', true);
         
-        return view('public.articles.index', compact('articles'));
+        // Filter by category slug
+        if ($request->has('category') && $request->category) {
+            $category = Category::where('slug', $request->category)->first();
+            if ($category) {
+                $query->where('category_id', $category->id);
+            }
+        }
+        
+        $articles = $query->latest()->paginate(9);
+        
+        // AMBIL SEMUA KATEGORI UNTUK FILTER
+        $categories = Category::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+        
+        return view('public.articles.index', compact('articles', 'categories'));
     }
 
-    /**
-     * Tampilkan detail artikel.
-     */
     public function show($slug)
     {
-        $article = Article::where('slug', $slug)->firstOrFail();
-        
-        // Artikel terbaru lainnya
-        $otherArticles = Article::where('id', '!=', $article->id)
-            ->latest()
-            ->take(3)
-            ->get();
-
-        return view('public.articles.show', compact('article', 'otherArticles'));
+        $article = Article::with('category')->where('slug', $slug)->firstOrFail();
+        return view('public.articles.show', compact('article'));
     }
 }
