@@ -12,6 +12,7 @@ class Product extends Model
     protected $fillable = [
         'name',
         'slug',
+        'category_id',
         'description',
         'price',
         'motif',
@@ -29,16 +30,16 @@ class Product extends Model
         'is_active' => 'boolean',
     ];
 
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
     public function getImageUrlAttribute()
     {
         if (empty($this->image_path)) {
             return null;
         }
-
-        if (str_starts_with($this->image_path, 'http')) {
-            return $this->image_path;
-        }
-
         return asset('storage/' . $this->image_path);
     }
 

@@ -164,51 +164,55 @@
             @endif
         </div>
 
-        <!-- Artikel Terbaru -->
-        <div class="bg-white border border-gray-200">
-            <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-                <h4 class="font-playfair font-bold text-sogan flex items-center gap-2">
-                    <i class="fas fa-file-alt text-batik-gold text-sm"></i>
-                    Artikel Terbaru
-                </h4>
-                <a href="{{ route('admin.articles.create') }}" 
-                   class="text-xs bg-sogan hover:bg-dark-brown text-white px-3 py-1.5 font-medium transition">
-                    + Tambah
+<!-- Artikel Terbaru -->
+<div class="bg-white border border-gray-200">
+    <div class="border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+        <h4 class="font-playfair font-bold text-sogan flex items-center gap-2">
+            <i class="fas fa-file-alt text-batik-gold text-sm"></i>
+            Artikel Terbaru
+        </h4>
+        <a href="{{ route('admin.articles.create') }}" 
+           class="text-xs bg-sogan hover:bg-dark-brown text-white px-3 py-1.5 font-medium transition">
+            + Tambah
+        </a>
+    </div>
+    <div class="divide-y divide-gray-100">
+        @forelse($latestArticles as $art)
+            <div class="px-6 py-3 flex justify-between items-center hover:bg-ivory/30 transition">
+                <div class="min-w-0">
+                    <p class="text-sm font-medium text-dark-brown truncate">{{ Str::limit($art->title, 30) }}</p>
+                    <p class="text-xs text-gray-400 flex items-center gap-2">
+                        @if($art->category)
+                            <span class="inline-block px-2 py-0.5 text-[10px] font-medium rounded bg-ivory text-sogan border border-batik-gold/20">
+                                {{ $art->category->name }}
+                            </span>
+                        @else
+                            <span class="text-gray-400 text-[10px]">Uncategorized</span>
+                        @endif
+                        <span class="w-px h-3 bg-gray-200"></span>
+                        <span>{{ $art->created_at->format('d M Y') }}</span>
+                    </p>
+                </div>
+                <a href="{{ route('admin.articles.edit', $art->id) }}" 
+                   class="text-xs text-batik-gold hover:text-sogan transition flex-shrink-0">
+                    <i class="fas fa-edit"></i>
                 </a>
             </div>
-            <div class="divide-y divide-gray-100">
-                @forelse($latestArticles as $art)
-                    <div class="px-6 py-3 flex justify-between items-center hover:bg-ivory/30 transition">
-                        <div class="min-w-0">
-                            <p class="text-sm font-medium text-dark-brown truncate">{{ Str::limit($art->title, 30) }}</p>
-                            <p class="text-xs text-gray-400 flex items-center gap-2">
-                                <span class="capitalize">{{ str_replace('_', ' ', $art->category) }}</span>
-                                <span class="w-px h-3 bg-gray-200"></span>
-                                <span>{{ $art->created_at->format('d M Y') }}</span>
-                            </p>
-                        </div>
-                        <a href="{{ route('admin.articles.edit', $art->id) }}" 
-                           class="text-xs text-batik-gold hover:text-sogan transition flex-shrink-0">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                    </div>
-                @empty
-                    <div class="px-6 py-8 text-center text-sm text-gray-400">
-                        <i class="fas fa-file-alt text-2xl block mb-2 text-gray-300"></i>
-                        Belum ada artikel
-                    </div>
-                @endforelse
+        @empty
+            <div class="px-6 py-8 text-center text-sm text-gray-400">
+                <i class="fas fa-file-alt text-2xl block mb-2 text-gray-300"></i>
+                Belum ada artikel
             </div>
-            @if($latestArticles->count() > 0)
-                <div class="border-t border-gray-200 px-6 py-3 text-center">
-                    <a href="{{ route('admin.articles.index') }}" class="text-xs text-batik-gold hover:underline">
-                        Lihat semua artikel →
-                    </a>
-                </div>
-            @endif
-        </div>
+        @endforelse
     </div>
-
+    @if($latestArticles->count() > 0)
+        <div class="border-t border-gray-200 px-6 py-3 text-center">
+            <a href="{{ route('admin.articles.index') }}" class="text-xs text-batik-gold hover:underline">
+                Lihat semua artikel →
+            </a>
+        </div>
+    @endif
+</div>
     <!-- ============================================ -->
     <!-- INFO BOTTOM - 2 KOLOM -->
     <!-- ============================================ -->

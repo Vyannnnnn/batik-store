@@ -8,8 +8,11 @@ use App\Models\Article;
 use App\Models\Gallery;
 use App\Models\HomeSetting;
 use App\Models\AboutSetting;
+use App\Models\Category;
+use App\Models\HealthSafetySetting;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -29,7 +32,7 @@ class DatabaseSeeder extends Seeder
         );
 
         // ============================================
-        // 2. SEED HOME SETTINGS
+        // 2. SEED HOME SETTINGS (TANPA GAMBAR)
         // ============================================
         HomeSetting::updateOrCreate(
             ['id' => 1],
@@ -37,7 +40,7 @@ class DatabaseSeeder extends Seeder
                 'hero_title' => 'Keanggunan Tradisi',
                 'hero_subtitle' => 'di Setiap Sajian',
                 'hero_badge' => 'Premium Art Tableware',
-                'hero_image' => 'hero-banners/default-hero.jpg',
+                'hero_image' => null, // ← TIDAK PAKAI GAMBAR
                 'hero_button_text' => 'Lihat Produk',
                 'hero_button_link' => '#product',
                 'product_section_label' => 'Koleksi Unggulan',
@@ -45,7 +48,7 @@ class DatabaseSeeder extends Seeder
                 'product_title' => 'Mangkuk Batik Kembang Malang',
                 'product_motif' => 'Motif Kembang Malang',
                 'product_description' => 'Mangkuk keramik premium dengan hiasan lukisan tangan motif Kembang Malang. Dibuat oleh pengrajin berpengalaman dari Kampung Keramik Dinoyo, Malang. Dilapisi glasir food-grade yang aman untuk makanan.',
-                'product_image' => 'products/mangkuk-default.jpg',
+                'product_image' => null, // ← TIDAK PAKAI GAMBAR
                 'product_booking_link' => 'https://forms.gle/your-google-form-link',
                 'product_badge' => 'Best Seller',
                 'dinoyo_section_label' => 'Warisan Budaya',
@@ -80,11 +83,11 @@ class DatabaseSeeder extends Seeder
                 
                 'apa_title' => 'Apa Itu Batikura?',
                 'apa_description' => 'Mangkuk dan piring khas Malang dengan higienitas yang dipadukan dengan estetika budaya Nusantara. Setiap produk adalah karya seni fungsional yang menghadirkan keindahan batik Malangan.',
-                'apa_image' => 'about/about-1.jpg',
+                'apa_image' => null,
                 
                 'mengapa_title' => 'Kenapa Batikura?',
                 'mengapa_description' => 'Piring keramik yang menghadirkan perpaduan antara higienitas, fungsi, dan nilai budaya dalam satu kesatuan.',
-                'mengapa_image' => 'about/about-2.jpg',
+                'mengapa_image' => null,
                 'mengapa_poin_1' => 'Membantu menjaga kebersihan permukaan alat makan.',
                 'mengapa_poin_2' => 'Dirancang untuk memberikan rasa aman dalam setiap penggunaan.',
                 'mengapa_poin_3' => 'Motif batik Malang yang sarat makna dan filosofi.',
@@ -119,7 +122,47 @@ class DatabaseSeeder extends Seeder
         );
 
         // ============================================
-        // 4. SEED PRODUCTS
+        // 4. SEED CATEGORIES
+        // ============================================
+        $categories = [
+            ['name' => 'Produk'],
+            ['name' => 'Kemasan'],
+            ['name' => 'Proses Pembuatan'],
+            ['name' => 'Kampung Keramik Dinoyo'],
+            ['name' => 'Batik Malang'],
+            ['name' => 'Topeng Malangan'],
+            ['name' => 'Higienitas Alat Makan'],
+        ];
+
+        foreach ($categories as $cat) {
+            Category::firstOrCreate(
+                ['name' => $cat['name']],
+                [
+                    'slug' => Str::slug($cat['name']),
+                    'is_active' => true,
+                ]
+            );
+        }
+
+        // ============================================
+        // 5. SEED HEALTH SAFETY (TANPA GAMBAR)
+        // ============================================
+        HealthSafetySetting::firstOrCreate(
+            ['id' => 1],
+            [
+                'badge' => 'Kesehatan & Keamanan',
+                'title' => 'Higienitas Alat Makan',
+                'description' => 'Alat makan plastik murah sering kali menyimpan risiko zat kimia berbahaya seperti BPA yang dapat larut ke dalam makanan hangat. Keramik premium dari Batikura Plate dibuat menggunakan bahan tanah liat alami yang dibakar pada suhu ekstrem di atas 1200 derajat Celsius. Proses vitrifikasi ini membuat permukaan keramik menjadi padat, non-porous, dan aman bagi kesehatan keluarga Anda.',
+                'features' => ['Non-porous', 'Lead-free', 'Anti Bakteri', 'Mudah Dibersihkan'],
+                'button_text' => 'Baca Selengkapnya',
+                'button_link' => '/artikel/kesehatan-keramik',
+                'image' => null, // ← TANPA GAMBAR
+                'is_active' => true,
+            ]
+        );
+
+        // ============================================
+        // 6. SEED PRODUCTS (TANPA GAMBAR)
         // ============================================
         $products = [
             [
@@ -129,7 +172,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 185000,
                 'motif' => 'Kembang Malang',
                 'size' => '25cm',
-                'image_path' => 'products/plate-kembang-malang.jpg',
+                'image_path' => null, // ← TANPA GAMBAR
                 'shopee_url' => 'https://shopee.co.id',
                 'tokopedia_url' => 'https://tokopedia.com',
                 'whatsapp_text' => 'Halo Admin, saya tertarik untuk memesan piring Batikura Plate Motif Kembang Malang (25cm). Mohon info ketersediaan barang.',
@@ -142,7 +185,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 150000,
                 'motif' => 'Candi Badut',
                 'size' => '20cm',
-                'image_path' => 'products/plate-candi-badut.jpg',
+                'image_path' => null, // ← TANPA GAMBAR
                 'shopee_url' => 'https://shopee.co.id',
                 'tokopedia_url' => 'https://tokopedia.com',
                 'whatsapp_text' => 'Halo Admin, saya tertarik untuk memesan piring Batikura Plate Motif Candi Badut (20cm). Mohon info ketersediaan barang.',
@@ -155,7 +198,7 @@ class DatabaseSeeder extends Seeder
                 'price' => 220000,
                 'motif' => 'Topeng Malangan',
                 'size' => '22cm',
-                'image_path' => 'products/plate-topeng-malangan.jpg',
+                'image_path' => null, // ← TANPA GAMBAR
                 'shopee_url' => 'https://shopee.co.id',
                 'tokopedia_url' => 'https://tokopedia.com',
                 'whatsapp_text' => 'Halo Admin, saya tertarik untuk memesan piring Batikura Plate Edisi Eksklusif Topeng Malangan. Mohon info ketersediaan barang.',
@@ -171,39 +214,44 @@ class DatabaseSeeder extends Seeder
         }
 
         // ============================================
-        // 5. SEED ARTICLES
+        // 7. SEED ARTICLES (TANPA GAMBAR)
         // ============================================
+        $catDinoyo = Category::where('name', 'Kampung Keramik Dinoyo')->first();
+        $catBatik = Category::where('name', 'Batik Malang')->first();
+        $catTopeng = Category::where('name', 'Topeng Malangan')->first();
+        $catHigienitas = Category::where('name', 'Higienitas Alat Makan')->first();
+
         $articles = [
             [
                 'title' => 'Sejarah Panjang Kampung Keramik Dinoyo Malang',
                 'slug' => 'sejarah-panjang-kampung-keramik-dinoyo-malang',
-                'category' => 'keramik_dinoyo',
+                'category_id' => $catDinoyo ? $catDinoyo->id : null,
                 'content' => 'Kampung Keramik Dinoyo merupakan salah satu ikon wisata budaya dan kerajinan legendaris di Kota Malang. Berdiri sejak tahun 1950-an, industri rumahan di daerah Dinoyo awalnya memproduksi gerabah tanah liat tradisional sebelum beralih ke keramik porselen putih yang lebih modern dan tahan lama. Keahlian ini diwariskan secara turun-temurun hingga saat ini, menciptakan produk piring, cangkir, dan vas hias dengan kualitas ekspor yang bernilai seni tinggi.',
-                'image_path' => 'articles/sejarah-keramik-dinoyo.jpg',
+                'image_path' => null, // ← TANPA GAMBAR
                 'is_published' => true,
             ],
             [
                 'title' => 'Mengenal Ragam Motif Batik Khas Malang',
                 'slug' => 'mengenal-ragam-motif-batik-khas-malang',
-                'category' => 'batik_malang',
+                'category_id' => $catBatik ? $catBatik->id : null,
                 'content' => 'Batik Malang (Malangan) memiliki karakter visual yang kuat, cerah, dan berani. Berbeda dari batik Solo atau Yogyakarta yang bernuansa kalem dan klasik, Batik Malang banyak mengeksplorasi simbol alam lokal seperti kembang tanjung, motif Candi Singosari, hingga ilustrasi Topeng Malangan. Di Batikura Plate, kami meramu filosofi batik Malangan ini ke atas permukaan piring keramik Dinoyo, menghasilkan perpaduan kebudayaan yang modern tanpa meninggalkan akar tradisi.',
-                'image_path' => 'articles/batik-malang.jpg',
+                'image_path' => null,
                 'is_published' => true,
             ],
             [
                 'title' => 'Topeng Malangan: Dari Pertunjukan Tari Ke Karya Seni Keramik',
                 'slug' => 'topeng-malangan-dari-pertunjukan-tari-ke-karya-seni-keramik',
-                'category' => 'topeng_malangan',
+                'category_id' => $catTopeng ? $catTopeng->id : null,
                 'content' => 'Topeng Malangan bukan sekadar pelindung wajah dalam pementasan Tari Topeng, melainkan simbol karakter watak manusia yang kaya makna spiritual. Tokoh seperti Raden Panji yang melambangkan kebaikan dan kelembutan serta Klono yang gagah berani diadaptasi ke dalam ukiran piring keramik premium kami. Piring Batikura Plate edisi Topeng Malangan ini didesain khusus agar setiap sajian kuliner di atasnya terasa seperti merayakan karya seni kebudayaan Jawa Timur.',
-                'image_path' => 'articles/topeng-malangan.jpg',
+                'image_path' => null,
                 'is_published' => true,
             ],
             [
                 'title' => 'Mengapa Higienitas Alat Makan Keramik Sangat Penting?',
                 'slug' => 'mengapa-higienitas-alat-makan-keramik-sangat-penting',
-                'category' => 'higienitas',
+                'category_id' => $catHigienitas ? $catHigienitas->id : null,
                 'content' => 'Alat makan plastik murah sering kali menyimpan risiko zat kimia berbahaya seperti BPA yang dapat larut ke dalam makanan hangat. Keramik premium dari Batikura Plate dibuat menggunakan bahan tanah liat alami yang dibakar pada suhu ekstrem di atas 1200 derajat Celsius. Proses vitrifikasi ini membuat permukaan piring keramik benar-benar padat (non-porous), bebas zat timbal berbahaya (Lead-free), sangat mudah dibersihkan dari minyak membandel, serta tidak menyerap bakteri.',
-                'image_path' => 'articles/higienitas-alat-makan.jpg',
+                'image_path' => null,
                 'is_published' => true,
             ],
         ];
@@ -216,34 +264,38 @@ class DatabaseSeeder extends Seeder
         }
 
         // ============================================
-        // 6. SEED GALLERIES
+        // 8. SEED GALLERIES (TANPA GAMBAR)
         // ============================================
+        $catProduk = Category::where('name', 'Produk')->first();
+        $catKemasan = Category::where('name', 'Kemasan')->first();
+        $catProses = Category::where('name', 'Proses Pembuatan')->first();
+
         $galleries = [
             [
                 'title' => 'Piring Batikura di Meja Makan',
-                'category' => 'produk',
-                'image_path' => 'gallery/gallery-produk-1.jpg',
+                'category_id' => $catProduk ? $catProduk->id : null,
+                'image_path' => null, // ← TANPA GAMBAR
                 'description' => 'Tampilan sajian kuliner nusantara di atas piring premium Batikura Plate.',
                 'is_active' => true,
             ],
             [
                 'title' => 'Kemasan Kotak Kayu Eksklusif',
-                'category' => 'kemasan',
-                'image_path' => 'gallery/gallery-kemasan-1.jpg',
+                'category_id' => $catKemasan ? $catKemasan->id : null,
+                'image_path' => null,
                 'description' => 'Kemasan hantaran / gift box eksklusif dari bahan kayu pinus pilihan.',
                 'is_active' => true,
             ],
             [
                 'title' => 'Proses Pemolesan Tanah Liat',
-                'category' => 'proses',
-                'image_path' => 'gallery/gallery-proses-1.jpg',
+                'category_id' => $catProses ? $catProses->id : null,
+                'image_path' => null,
                 'description' => 'Tahap pembentukan tanah liat secara manual (throwing) oleh pengrajin Dinoyo.',
                 'is_active' => true,
             ],
             [
                 'title' => 'Proses Melukis Motif Batik',
-                'category' => 'proses',
-                'image_path' => 'gallery/gallery-proses-2.jpg',
+                'category_id' => $catProses ? $catProses->id : null,
+                'image_path' => null,
                 'description' => 'Tahapan hand-painting gambar batik halus di atas keramik setengah matang sebelum diglasir.',
                 'is_active' => true,
             ],
@@ -256,7 +308,8 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        $this->command->info(' Database seeding selesai!');
-        $this->command->info(' Admin: username=admin, password=password123');
+        $this->command->info('✅ Database seeding selesai!');
+        $this->command->info('🔑 Admin: username=admin, password=password123');
+        $this->command->info('📸 Upload gambar melalui admin panel setelah seeding.');
     }
 }
