@@ -217,29 +217,6 @@
     <!-- INFO BOTTOM - 2 KOLOM -->
     <!-- ============================================ -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        <!-- Quick Stats -->
-        <div class="bg-white border border-gray-200 p-6">
-            <h4 class="font-playfair font-bold text-sogan flex items-center gap-2 mb-4">
-                <i class="fas fa-chart-simple text-batik-gold text-sm"></i>
-                Statistik
-            </h4>
-            <div class="grid grid-cols-3 gap-4">
-                <div>
-                    <p class="text-xs text-gray-400">Kategori</p>
-                    <p class="text-xl font-bold text-sogan">{{ $categoryCount ?? 0 }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400">Produk Aktif</p>
-                    <p class="text-xl font-bold text-emerald-600">{{ $activeProducts ?? 0 }}</p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-400">Artikel Terbit</p>
-                    <p class="text-xl font-bold text-blue-600">{{ $publishedArticles ?? 0 }}</p>
-                </div>
-            </div>
-        </div>
-
         <!-- Shortcuts -->
         <div class="bg-white border border-gray-200 p-6">
             <h4 class="font-playfair font-bold text-sogan flex items-center gap-2 mb-4">
