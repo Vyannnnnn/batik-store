@@ -164,7 +164,6 @@
                     <ul class="space-y-2.5 text-sm">
                         <li><a href="{{ route('gallery.index') }}" class="text-white/60 hover:text-batik-gold transition-colors">Galeri Foto</a></li>
                         <li><a href="{{ route('contact') }}" class="text-white/60 hover:text-batik-gold transition-colors">Kontak Kami</a></li>
-                        <li><span class="text-white/40 text-xs">WhatsApp: +62 812-3456-7890</span></li>
                     </ul>
                 </div>
 
